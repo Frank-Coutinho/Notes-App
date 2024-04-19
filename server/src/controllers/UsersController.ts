@@ -1,20 +1,35 @@
-import { getRandomValues, randomUUID } from "crypto";
+// import { getRandomValues, randomUUID } from "crypto";
 import { FastifyReply, FastifyRequest } from "fastify";
+import { prisma } from "../db";
 
 interface Iuser {
-  name: String;
-  email: String;
-  password: String;
+  name: string;
+  email: string;
+  password: string;
 }
 
 export class UsersController {
   users = new Map();
-  create(request: FastifyRequest, reply: FastifyReply) {
+  async create(request: FastifyRequest, reply: FastifyReply) {
     const { name, email, password } = request.body as Iuser;
 
-    const id = randomUUID();
-    this.users.set(id, { name, email, password });
-    return reply.send({ status: "success" });
+    const userExists = await prisma.user.findUnique({
+      where: {
+        email,
+      },
+    });
+
+    if (userExists) {
+      return reply.status(400).send({ error: "User already exists" });
+    }
+
+    await prisma.user.create({
+      data: {
+        name,
+        email,
+        password
+      },
+    });
   }
 
   list(request: FastifyRequest, reply: FastifyReply) {
