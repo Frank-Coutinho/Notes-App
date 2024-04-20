@@ -10,6 +10,8 @@ interface Iuser {
 
 export class UsersController {
   users = new Map();
+  
+  // Create users
   async create(request: FastifyRequest, reply: FastifyReply) {
     const { name, email, password } = request.body as Iuser;
 
@@ -19,6 +21,7 @@ export class UsersController {
       },
     });
 
+    // Validating creation of new users
     if (userExists) {
       return reply.status(400).send({ error: "User already exists" });
     }
@@ -34,7 +37,7 @@ export class UsersController {
     return reply.status(201).send("User created");
   }
 
-  // HTTP GET users request
+  // List users
   async list(request: FastifyRequest, reply: FastifyReply) {
     interface reqParams {
       id: string;
@@ -57,11 +60,23 @@ export class UsersController {
     }
     const { id } = request.body as reqParams
     interface reqBodyProps {
-      email: string;
-      name: string;
+      email?: string;
+      name?: string;
     }
     const { email, name } = request.body as reqBodyProps;
 
-    // const user = await prisma.user.update({});
+    if (email){
+      const userExists = await prisma.user.findFirst({
+        where: {
+          email
+        }
+      })
+
+      if (userExists?.email) {
+        return reply.status(400).send()
+      }
+    }
+
+    const updatedUser = await prisma.user.update({});
   }
 }
