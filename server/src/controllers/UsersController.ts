@@ -27,18 +27,41 @@ export class UsersController {
       data: {
         name,
         email,
-        password
+        password,
       },
     });
+
+    return reply.status(201).send("User created");
   }
 
-  list(request: FastifyRequest, reply: FastifyReply) {
-    const usersArr = Array.from(this.users).map((item) => {
-      return {
-        id: item[0],
-        ...item[1],
-      };
-    });
-    return reply.send(usersArr);
+  // HTTP GET users request
+  async list(request: FastifyRequest, reply: FastifyReply) {
+    interface reqParams {
+      id: string;
+    }
+
+    const { id } = request.body as reqParams;
+    // find user by ID
+    const user = await prisma.user.findFirst({ where: { id } });
+    // validating if it's a user
+    if (!user) {
+      return reply.status(404).send("user doen't exist");
+    }
+
+    return reply.send();
+  }
+
+  async update(request: FastifyRequest, reply: FastifyReply) {
+    interface reqParams {
+      id: string;
+    }
+    const { id } = request.body as reqParams
+    interface reqBodyProps {
+      email: string;
+      name: string;
+    }
+    const { email, name } = request.body as reqBodyProps;
+
+    // const user = await prisma.user.update({});
   }
 }
