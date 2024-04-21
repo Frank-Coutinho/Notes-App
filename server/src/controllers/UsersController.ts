@@ -85,5 +85,23 @@ export class UsersController {
         id,
       },
     });
+    return reply.send(updatedUser)
+  }
+
+  async delete (request: FastifyRequest, reply: FastifyReply) {
+    interface user {
+      id: string
+    }
+
+    const { id } = request.body as user
+
+    const deleteUser = await prisma.user.delete({
+      data: {
+        
+      },
+      where: {
+
+      }
+    })
   }
 }
