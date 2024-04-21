@@ -10,7 +10,7 @@ interface Iuser {
 
 export class UsersController {
   users = new Map();
-  
+
   // Create users
   async create(request: FastifyRequest, reply: FastifyReply) {
     const { name, email, password } = request.body as Iuser;
@@ -58,25 +58,32 @@ export class UsersController {
     interface reqParams {
       id: string;
     }
-    const { id } = request.body as reqParams
+    const { id } = request.body as reqParams;
     interface reqBodyProps {
       email?: string;
       name?: string;
     }
     const { email, name } = request.body as reqBodyProps;
 
-    if (email){
+    if (email) {
       const userExists = await prisma.user.findFirst({
         where: {
-          email
-        }
-      })
+          email,
+        },
+      });
 
       if (userExists?.email) {
-        return reply.status(400).send()
+        return reply.status(400).send();
       }
     }
-
-    const updatedUser = await prisma.user.update({});
+    const updatedUser = await prisma.user.update({
+      data: {
+        email,
+        name,
+      },
+      where: {
+        id,
+      },
+    });
   }
 }
