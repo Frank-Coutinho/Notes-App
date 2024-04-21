@@ -89,19 +89,17 @@ export class UsersController {
   }
 
   async delete (request: FastifyRequest, reply: FastifyReply) {
-    interface user {
-      id: string
+    interface reqBodyParams{
+      email: string
     }
 
-    const { id } = request.body as user
+    const { email } = request.body as reqBodyParams
 
     const deleteUser = await prisma.user.delete({
-      data: {
-        
-      },
       where: {
-
+        email
       }
     })
+    return reply.send("User deleted successfully")
   }
 }
