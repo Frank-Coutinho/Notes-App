@@ -1,6 +1,7 @@
 // import { getRandomValues, randomUUID } from "crypto";
 import { FastifyReply, FastifyRequest } from "fastify";
 import { prisma } from "../db";
+import { UserRepository } from "../repositories/UserRepository";
 
 interface Iuser {
   name: string;
@@ -8,12 +9,14 @@ interface Iuser {
   password: string;
 }
 
+const userRepository = new UserRepository();
 export class UsersController {
-  users = new Map();
+  client = userRepository;
 
   // Create users
   async create(request: FastifyRequest, reply: FastifyReply) {
     const { name, email, password } = request.body as Iuser;
+    this.client.save({ name, email, password });
 
     const userExists = await prisma.user.findUnique({
       where: {
@@ -85,21 +88,21 @@ export class UsersController {
         id,
       },
     });
-    return reply.send(updatedUser)
+    return reply.send(updatedUser);
   }
 
-  async delete (request: FastifyRequest, reply: FastifyReply) {
-    interface reqBodyParams{
-      email: string
+  async delete(request: FastifyRequest, reply: FastifyReply) {
+    interface reqBodyParams {
+      email: string;
     }
 
-    const { email } = request.body as reqBodyParams
+    const { email } = request.body as reqBodyParams;
 
     const deleteUser = await prisma.user.delete({
       where: {
-        email
-      }
-    })
-    return reply.send("User deleted successfully")
+        email,
+      },
+    });
+    return reply.send("User deleted successfully");
   }
 }
