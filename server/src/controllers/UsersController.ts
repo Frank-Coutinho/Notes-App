@@ -16,26 +16,13 @@ export class UsersController {
   // Create users
   async create(request: FastifyRequest, reply: FastifyReply) {
     const { name, email, password } = request.body as Iuser;
-    this.client.save({ name, email, password });
+    this.client.save({ name, email, password, writtenNotes });
 
-    const userExists = await prisma.user.findUnique({
-      where: {
-        email,
-      },
-    });
-
-    // Validating creation of new users
+    // Validation
+    const userExists = await this.client.findByEmail(email);
     if (userExists) {
       return reply.status(400).send({ error: "User already exists" });
     }
-
-    await prisma.user.create({
-      data: {
-        name,
-        email,
-        password,
-      },
-    });
 
     return reply.status(201).send("User created");
   }
@@ -46,15 +33,14 @@ export class UsersController {
       id: string;
     }
 
-    const { id } = request.body as reqParams;
+    const { id } = request.params as reqParams;
     // find user by ID
-    const user = await prisma.user.findFirst({ where: { id } });
-    // validating if it's a user
+    const user = await this.client.findById(id);
     if (!user) {
       return reply.status(404).send("user doen't exist");
     }
 
-    return reply.send();
+    return reply.send(user);
   }
 
   async update(request: FastifyRequest, reply: FastifyReply) {
@@ -65,29 +51,18 @@ export class UsersController {
     interface reqBodyProps {
       email?: string;
       name?: string;
+      password:string
+      writtenNotes: string
     }
-    const { email, name } = request.body as reqBodyProps;
+    const { email, name, password, writtenNotes } = request.body as reqBodyProps;
 
     if (email) {
-      const userExists = await prisma.user.findFirst({
-        where: {
-          email,
-        },
-      });
-
+      const userExists = await this.client.findByEmail(email)
       if (userExists?.email) {
         return reply.status(400).send();
       }
     }
-    const updatedUser = await prisma.user.update({
-      data: {
-        email,
-        name,
-      },
-      where: {
-        id,
-      },
-    });
+    const updatedUser = await this.client.update(id, name,);
     return reply.send(updatedUser);
   }
 
