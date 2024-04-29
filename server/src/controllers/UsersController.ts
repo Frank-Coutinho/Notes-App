@@ -62,7 +62,7 @@ export class UsersController {
         return reply.status(400).send();
       }
     }
-    const updatedUser = await this.client.update(id, name,);
+    const updatedUser = await this.client.update(id, name);
     return reply.send(updatedUser);
   }
 

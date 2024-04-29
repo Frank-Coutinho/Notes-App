@@ -2,22 +2,23 @@ import { prisma } from "../db";
 import bcrypt from "bcrypt";
 
 interface userProps {
-  name?: string;
-  email?: string;
-  password?: string;
+  name: string;
+  email: string;
   writtenNotes?: string;
+  password?: string;
 }
 
 export class UserRepository {
   client = prisma.user;
 
   async save(user: userProps) {
-    const { name, email, password } = user;
+    const { name, email, password, writtenNotes } = user;
     const passwordHash = password ? await bcrypt.hash(password, 10) : null;
     const savedUser = await this.client.create({
       data: {
         name,
         email,
+        writtenNotes,
         password: passwordHash,
       },
     });
